@@ -1,0 +1,9 @@
+apiVersion: v2
+name: mirrorverse
+description: A Kubernetes controller that syncs Secrets and ConfigMaps across namespaces
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+maintainers:
+- email: badal@devtron.ai
+  name: Badal Kumar

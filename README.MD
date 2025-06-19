@@ -37,7 +37,7 @@ Powered by label-driven syncing and conflict-resolution strategies, it ensures y
 
 ## Key Labels & Annotations
 
-| Resource | Key Label/Annotation                        | Purpose                        |
+| Resource | Key Label                                   | Purpose                        |
 |----------|---------------------------------------------|--------------------------------|
 | Source   | `mirrorverse.dev/sync-source: "true"`       | Opt-in to syncing              |
 | Source   | `mirrorverse.dev/targets: "staging-prod"`   | Where to sync                  |

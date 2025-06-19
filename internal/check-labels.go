@@ -2,35 +2,25 @@
 package internal
 
 import (
-	"fmt"
 	corev1 "k8s.io/api/core/v1"
 )
 
-func CheckIfLabelsPresent(resource string,name string,obj interface{}) bool {
-	
-    fmt.Printf("Checking labels for %s %s \n", name,resource)
+// Returns true if the object has the sync-source label set to "true"
+func HasSyncSourceLabel(obj interface{}) bool {
 	labels := GetLabels(obj)
 	if labels == nil {
-		fmt.Printf("No labels found for %s %s\n", resource, name)
 		return false
 	}
-	for key, value := range labels {
-		if key == "mirrorverse.dev/sync-source" && value == "true" {
-			fmt.Printf("Label %s=%s found for %s %s\n", key, value, resource, name)
-			return true
-		}
-	}
-	return false;
+	return labels["mirrorverse.dev/sync-source"] == "true"
 }
 
-
-
+// Returns the labels of a ConfigMap or Secret, or nil otherwise
 func GetLabels(obj interface{}) map[string]string {
 	switch o := obj.(type) {
 	case *corev1.ConfigMap:
-		return o.GetObjectMeta().GetLabels()
+		return o.Labels
 	case *corev1.Secret:
-		return o.GetObjectMeta().GetLabels()
+		return o.Labels
 	default:
 		return nil
 	}

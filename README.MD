@@ -11,26 +11,26 @@ Powered by label-driven syncing and conflict-resolution strategies, it ensures y
 ## Architecture
 
 ```
-+-------------------------+
-| Kubernetes API Server   |
-+-----------+-------------+
-            |
-    Watch Secrets & ConfigMaps
-            |
-+-----------v-------------+
-|    Syncer Controller    |
-|                         |
-| - Detect labeled source |
-| - Parse labels          |
-| - Reconcile logic       |
-+-----------+-------------+
-            |
-    Create/Update Resources
-            |
-+-----------v-------------+
-|     Target Namespaces    |
-| (e.g., staging, prod)    |
-+--------------------------+
+                                                +-------------------------+
+                                                | Kubernetes API Server   |
+                                                +-----------+-------------+
+                                                            |
+                                                 Watch Secrets & ConfigMaps
+                                                            |
+                                                +-----------v-------------+
+                                                |    Syncer Controller    |
+                                                |                         |
+                                                | - Detect labeled source |
+                                                | - Parse labels          |
+                                                | - Reconcile logic       |
+                                                +-----------+-------------+
+                                                            |
+                                                Create/Update Resources
+                                                            |
+                                                +-----------v-------------+
+                                                |     Target Namespaces    |
+                                                | (e.g., staging, prod)    |
+                                                +--------------------------+
 ```
 
 ---

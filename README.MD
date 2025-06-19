@@ -35,7 +35,7 @@ Powered by label-driven syncing and conflict-resolution strategies, it ensures y
 
 ---
 
-## Key Labels & Annotations
+## Key Labels 
 
 | Resource | Key Label                                   | Purpose                        |
 |----------|---------------------------------------------|--------------------------------|

@@ -8,4 +8,4 @@ metadata:
   name: test-configmap
   namespace: default
 data:
-  key1: mr-badal
+  key1: old-value1

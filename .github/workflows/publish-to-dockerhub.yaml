@@ -29,6 +29,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: ./Dockerfile
           push: true
           tags: index.docker.io/badal773/mirrorverse:latest

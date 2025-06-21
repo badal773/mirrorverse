@@ -11,7 +11,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/yaml"
 )
 
 func CreateResource(clientset *k8s.Clientset, obj interface{}) {
@@ -111,17 +110,10 @@ func CreateResource(clientset *k8s.Clientset, obj interface{}) {
 		}
 		fmt.Printf("Creating %T '%s' in namespace '%s'...\n", obj, name, targetNS)
 		// Print the manifest as YAML before applying
-		var yamlBytes []byte
 		var err error
 		switch o := obj.(type) {
 		case *corev1.ConfigMap:
 			o.Namespace = targetNS
-			yamlBytes, err = yaml.Marshal(o)
-			if err == nil {
-				fmt.Printf("---\n%s\n---\n", string(yamlBytes))
-			} else {
-				fmt.Printf("Failed to marshal ConfigMap to YAML: %v\n", err)
-			}
 			_, err = clientset.CoreV1().ConfigMaps(targetNS).Create(context.TODO(), o, v1.CreateOptions{})
 			if err != nil {
 				fmt.Printf("Failed to create ConfigMap '%s' in namespace '%s': %v\n", name, targetNS, err)
@@ -130,12 +122,6 @@ func CreateResource(clientset *k8s.Clientset, obj interface{}) {
 			}
 		case *corev1.Secret:
 			o.Namespace = targetNS
-			yamlBytes, err = yaml.Marshal(o)
-			if err == nil {
-				fmt.Printf("---\n%s\n---\n", string(yamlBytes))
-			} else {
-				fmt.Printf("Failed to marshal Secret to YAML: %v\n", err)
-			}
 			_, err = clientset.CoreV1().Secrets(targetNS).Create(context.TODO(), o, v1.CreateOptions{})
 			if err != nil {
 				fmt.Printf("Failed to create Secret '%s' in namespace '%s': %v\n", name, targetNS, err)

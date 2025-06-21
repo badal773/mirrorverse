@@ -62,13 +62,15 @@ func handleEvent(event watch.Event, resource string, clientset *kubernetes.Clien
 	name := getName(event.Object)
 	switch event.Type {
 	case watch.Added:
-		fmt.Printf("%s created: %s\n", resource, name)
+		fmt.Printf("%s created: %s", resource, name)
 		if HasSyncSourceLabel(event.Object) {
+			fmt.Printf(" - found the source labels...\n")
 			CreateResource(clientset, event.Object)
 		}
 	case watch.Modified:
 		fmt.Printf("%s updated: %s\n", resource, name)
 		if HasSyncSourceLabel(event.Object) {
+			fmt.Printf(" - found the source labels...\n")
 			CreateResource(clientset, event.Object)
 		}
 	case watch.Deleted:

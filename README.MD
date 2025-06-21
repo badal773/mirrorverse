@@ -40,14 +40,14 @@ Powered by label-driven syncing and conflict-resolution strategies, it ensures y
 | Resource | Key Label                                   | Purpose                        |
 |----------|---------------------------------------------|--------------------------------|
 | Source   | `mirrorverse.dev/sync-source: "true"`       | Opt-in to syncing              |
-| Source   | `mirrorverse.dev/targets: "staging-prod"`   | Where to sync                  |
-| Source   | `mirrorverse.dev/strategy: "override/patch"`| Syncing mode                   |
+| Source   | `mirrorverse.dev/targets: "staging_prod"`   | Where to sync                  |
+| Source   | `mirrorverse.dev/strategy: "replace(default)/patch"`| Syncing mode                   |
 
 
 | Resource | Key Label                                   | Purpose                        |
 |----------|---------------------------------------------|--------------------------------|
 | Replica  | `mirrorverse.dev/sync-replica: "true"`      | Marked as managed by you       |
-| Replica  | `mirrorverse.dev/sync-source-ref: "dev-db"` | Tracks origin                  |
+| Replica  | `mirrorverse.dev/sync-source-ref: "dev.db"` | Tracks origin                  |
 | Replica  | `mirrorverse.dev/stale: "true"`             | Marked as stale if source gone |
 
 ---

@@ -2,21 +2,19 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"strings"
-	"time"
-
-	"context"
-
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 )
 
+
 func CreateResource(clientset *k8s.Clientset, obj interface{}) {
 	labels := GetLabels(obj)
-	var name, namespace, strategy, targets, exclude string
-
+	var name, namespace string
 	// Extract namespace from manifest
 	switch o := obj.(type) {
 	case *corev1.ConfigMap:
@@ -30,74 +28,17 @@ func CreateResource(clientset *k8s.Clientset, obj interface{}) {
 		return
 	}
 
-	// Parse targets, exclude, and strategy
-	for key, value := range labels {
-		if key == "mirrorverse.dev/targets" {
-			targets = value
-		}
-		if key == "mirrorverse.dev/exclude" {
-			exclude = value
-		}
-		if key == "mirrorverse.dev/strategy" {
-			strategy = value
-		}
-	}
-
-	// Remove all labels starting with mirrorverse.dev/
-	cleanLabels := make(map[string]string)
-	for k, v := range labels {
-		if !strings.HasPrefix(k, "mirrorverse.dev/") {
-			cleanLabels[k] = v
-		}
-	}
-
-	// Add managed-by-me labels with valid values
-	managedLabels := map[string]string{
-		"mirrorverse.dev/sync-replica":    "true",
-		"mirrorverse.dev/sync-source-ref": fmt.Sprintf("%s-%s", namespace, name), // use - instead of /
-		"mirrorverse.dev/last-synced":     time.Now().Format("2006-01-02T15:04:05Z07:00") ,  // compact, valid label value
-	}
-	if strategy != "" {
-		managedLabels["mirrorverse.dev/strategy"] = strategy
-	}
-	for k, v := range managedLabels {
-		cleanLabels[k] = v
-	}
-
-	// Remove namespace from manifest and set new labels
-	switch o := obj.(type) {
-	case *corev1.ConfigMap:
-		o.Namespace = ""
-		o.Labels = cleanLabels
-		// Remove unwanted metadata fields
-		o.UID = ""
-		o.ResourceVersion = ""
-		o.CreationTimestamp = v1.Time{}
-		o.ManagedFields = nil
-		if o.Annotations != nil {
-			delete(o.Annotations, "kubectl.kubernetes.io/last-applied-configuration")
-		}
-	case *corev1.Secret:
-		o.Namespace = ""
-		o.Labels = cleanLabels
-		// Remove unwanted metadata fields
-		o.UID = ""
-		o.ResourceVersion = ""
-		o.CreationTimestamp = v1.Time{}
-		o.ManagedFields = nil
-		if o.Annotations != nil {
-			delete(o.Annotations, "kubectl.kubernetes.io/last-applied-configuration")
-		}
-	}
+	finalLabels, targets, exclude, strategy := PrepareLabels(labels, namespace, name)
+	UpdateResourceMeta(obj, finalLabels)
 
 	// Prepare target and exclude namespaces
 	targetNamespaces := []string{}
 	if targets != "" {
-		targetNamespaces = strings.Split(targets, "-")
+		targetNamespaces = strings.Split(targets, "_")
 	}
 	excludeNamespaces := map[string]bool{}
 	if exclude != "" {
-		for _, ns := range strings.Split(exclude, "-") {
+		for _, ns := range strings.Split(exclude, "_") {
 			excludeNamespaces[strings.TrimSpace(ns)] = true
 		}
 	}
@@ -108,26 +49,46 @@ func CreateResource(clientset *k8s.Clientset, obj interface{}) {
 		if targetNS == "" || excludeNamespaces[targetNS] {
 			continue
 		}
-		fmt.Printf("Creating %T '%s' in namespace '%s'...\n", obj, name, targetNS)
-		// Print the manifest as YAML before applying
-		var err error
+		// Set the target namespace for the object
+		var objtype string
 		switch o := obj.(type) {
 		case *corev1.ConfigMap:
 			o.Namespace = targetNS
-			_, err = clientset.CoreV1().ConfigMaps(targetNS).Create(context.TODO(), o, v1.CreateOptions{})
-			if err != nil {
-				fmt.Printf("Failed to create ConfigMap '%s' in namespace '%s': %v\n", name, targetNS, err)
-			} else {
-				fmt.Printf("Created ConfigMap '%s' in namespace '%s'\n", name, targetNS)
-			}
+			objtype = "configMap"
 		case *corev1.Secret:
 			o.Namespace = targetNS
-			_, err = clientset.CoreV1().Secrets(targetNS).Create(context.TODO(), o, v1.CreateOptions{})
-			if err != nil {
-				fmt.Printf("Failed to create Secret '%s' in namespace '%s': %v\n", name, targetNS, err)
-			} else {
-				fmt.Printf("Created Secret '%s' in namespace '%s'\n", name, targetNS)
-			}
+			objtype = "Secret"
+		}
+		// Try to create, update if already exists
+		fmt.Printf("creating %s '%s' in namespace '%s'...\n", objtype, name, targetNS)
+		createOrUpdateResource(clientset, obj, strategy, targetNS, name)
+	}
+}
+
+// createOrUpdateResource tries to create, and updates if already exists
+func createOrUpdateResource(clientset *k8s.Clientset, obj interface{}, strategy, namespace, name string) error {
+	var err error
+	switch o := obj.(type) {
+	case *corev1.ConfigMap:
+		_, err = clientset.CoreV1().ConfigMaps(namespace).Create(context.TODO(), o, v1.CreateOptions{})
+		if err != nil && apierrors.IsAlreadyExists(err) {
+			fmt.Printf("ConfigMap '%s' already exists in namespace '%s', updating.\n", name, namespace)
+			UpdateResource(clientset, o, strategy, namespace, name)
+			return nil // Return early after update
+		}
+	case *corev1.Secret:
+		_, err = clientset.CoreV1().Secrets(namespace).Create(context.TODO(), o, v1.CreateOptions{})
+		if err != nil && apierrors.IsAlreadyExists(err) {
+			fmt.Printf("Secret '%s' already exists in namespace '%s', updating.\n", name, namespace)
+			UpdateResource(clientset, o, strategy, namespace, name)
+			return nil // Return early after update
+
 		}
 	}
+	if err != nil {
+		fmt.Printf("Failed to create resource '%s' in namespace '%s': %v\n", name, namespace, err)
+	} else {
+		fmt.Printf("Created resource '%s' in namespace '%s'\n", name, namespace)
+	}
+	return err
 }

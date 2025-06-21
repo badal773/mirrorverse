@@ -56,7 +56,7 @@ func CreateResource(clientset *k8s.Clientset, obj interface{}) {
 	managedLabels := map[string]string{
 		"mirrorverse.dev/sync-replica":    "true",
 		"mirrorverse.dev/sync-source-ref": fmt.Sprintf("%s-%s", namespace, name), // use - instead of /
-		"mirrorverse.dev/last-synced":     time.Now().Format("20060102T150405"),  // compact, valid label value
+		"mirrorverse.dev/last-synced":     time.Now().Format("2006-01-02T15:04:05Z07:00") ,  // compact, valid label value
 	}
 	if strategy != "" {
 		managedLabels["mirrorverse.dev/strategy"] = strategy

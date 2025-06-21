@@ -1,12 +1,9 @@
-# https://docs.github.com/en/actions/use-cases-and-examples/publishing-packages/publishing-docker-images#publishing-images-to-docker-hub
-name: Publishing to Docker Hub
-
+# https://docs.docker.com/build/ci/github-actions/multi-platform/
+name: Publishing image to Docker Hub
 on:
   push:
     branches:
       - main
-
-
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
@@ -23,6 +20,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: index.docker.io
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push Docker image
         id: push

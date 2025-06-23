@@ -1,1 +1,645 @@
-<h1>Mirrorverse Docs Coming Soon</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mirrorverse - Sync Kubernetes Resources Across Dimensions</title>
+    <meta name="description" content="Mirrorverse is a Kubernetes controller that keeps Secrets and ConfigMaps perfectly mirrored across namespaces, inspired by Marvel's multiverse.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22none%22 stroke=%22%23F59E0B%22 stroke-width=%2210%22/></svg>">
+
+    <style>
+        :root {
+            --dark-bg: #0d1117;
+            --primary-accent: #f59e0b; /* A vibrant orange-gold */
+            --primary-accent-glow: rgba(245, 158, 11, 0.7);
+            --light-text: #c9d1d9;
+            --medium-text: #8b949e;
+            --border-color: #30363d;
+            --code-bg: #161b22;
+            --card-bg: #1a2029;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: white;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--primary-accent);
+        }
+
+        .nav-links a {
+            color: var(--light-text);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-accent);
+        }
+
+        /* --- Hero & Portal Animation --- */
+        .hero {
+            position: relative;
+            padding: 120px 0;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            overflow: hidden;
+            background-color: var(--dark-bg);
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: white;
+            text-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+        }
+
+        .hero .tagline {
+            font-size: 1.5rem;
+            color: var(--light-text);
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero .subtitle {
+            font-size: 1rem;
+            color: var(--medium-text);
+            margin-bottom: 2.5rem;
+        }
+
+        .portal-graphic {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 700px;
+            height: 700px;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .portal-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent 0%, transparent 70%, var(--primary-accent) 95%, white 100%);
+            animation: spin 8s linear infinite;
+            mask-image: radial-gradient(transparent, transparent 65%, black 65%);
+            -webkit-mask-image: radial-gradient(transparent, transparent 65%, black 65%);
+        }
+
+        .portal-ring::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 20px 10px var(--primary-accent-glow), inset 0 0 15px 5px var(--primary-accent-glow);
+            filter: blur(5px);
+        }
+
+        .portal-ring:nth-child(2) {
+            width: 90%;
+            height: 90%;
+            top: 5%;
+            left: 5%;
+            animation: spin 12s linear infinite reverse;
+            transform-origin: center;
+        }
+
+        .portal-ring:nth-child(3) {
+            width: 110%;
+            height: 110%;
+            top: -5%;
+            left: -5%;
+            opacity: 0.6;
+            animation: spin 10s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-accent);
+            color: var(--dark-bg);
+        }
+
+        .btn-primary:hover {
+            background-color: #ffb742;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--light-text);
+            border-color: var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--code-bg);
+            border-color: var(--light-text);
+        }
+        
+        .btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--medium-text);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2), 0 0 15px rgba(245, 158, 11, 0.1);
+        }
+
+        .feature-card h3 {
+            color: var(--primary-accent);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            color: var(--light-text);
+            font-family: 'SF Mono', 'Menlo', 'monospace';
+            font-size: 0.9rem;
+            white-space: pre;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--border-color);
+            color: var(--light-text);
+            border: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #444c56;
+        }
+        
+        /* --- Labels & Annotations --- */
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--card-bg);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        
+        table th, table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table th {
+            background-color: var(--code-bg);
+            font-weight: 700;
+            color: var(--light-text);
+        }
+
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        table td code {
+            background: var(--code-bg);
+            color: #79c0ff; /* Light blue for code */
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Menlo', 'monospace';
+        }
+        
+        h3.table-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-weight: 500;
+        }
+        
+        .table-section + .table-section {
+             margin-top: 3rem;
+        }
+        
+        .notes-block {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(33, 150, 243, 0.05);
+            border-left: 4px solid #2196F3;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .notes-block ul {
+            padding-left: 20px;
+            color: var(--light-text);
+        }
+        
+        .notes-block li {
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--medium-text);
+        }
+        
+        footer a {
+            color: var(--primary-accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .hero .tagline { font-size: 1.1rem; }
+            header .container { flex-direction: column; gap: 1rem; }
+            .nav-links { display: flex; justify-content: center; width: 100%; }
+            .nav-links a { margin: 0 10px; }
+            .portal-graphic { width: 500px; height: 500px; opacity: 0.5; }
+        }
+        
+        @media (max-width: 480px) {
+            .portal-graphic { display: none; } /* Hide complex animation on small screens for performance */
+            .hero { padding: 80px 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <a href="#" class="logo">Mirror<span>verse</span></a>
+            <nav class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#labels">Labels</a>
+                <a href="#install">Install</a>
+                <a href="https://github.com/badal773/mirrorverse" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="portal-graphic" aria-hidden="true">
+                <div class="portal-ring"></div>
+                <div class="portal-ring"></div>
+                <div class="portal-ring"></div>
+            </div>
+            <div class="hero-content">
+                <h1>Mirrorverse</h1>
+                <p class="tagline">Keep Secrets and ConfigMaps perfectly mirrored across dimensions (namespaces).</p>
+                <p class="subtitle">Powered by label-driven syncing and conflict-resolution strategies, it ensures your configs are always in sync — even in multiverse chaos.</p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/badal773/mirrorverse" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0 0 22 12c0-5.523-4.477-10-10-10Z"/></svg>
+                        View on GitHub
+                    </a>
+                    <a href="#install" class="btn btn-secondary">Get Started</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>How It Works</h2>
+                    <p>Mirrorverse operates through a simple but powerful reconciliation loop within your Kubernetes cluster.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>1. Label & Watch</h3>
+                        <p>Apply the <code>mirrorverse.dev/sync-source: "true"</code> label to a source Secret or ConfigMap. The controller immediately detects it and reads its sync configuration.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>2. Reconcile & Sync</h3>
+                        <p>Mirrorverse parses the target namespaces and sync strategy. It then creates or updates replicas in each target dimension, ensuring they match the source of truth.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>3. Maintain & Clean</h3>
+                        <p>The controller continuously monitors for drift. If a source is deleted, it can automatically clean up replicas or mark them as stale, based on your configuration.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture" style="background-color: var(--card-bg);">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Architecture</h2>
+                    <p>
+                        Mirrorverse runs as a lightweight controller in your cluster. It watches for labeled Secrets/ConfigMaps, reconciles their state, and keeps replicas in sync across target namespaces. If a source is deleted, it cleans up or marks replicas as stale.
+                    </p>
+                </div>
+                <div class="code-block">
+                    <pre><code>
+                                            +-------------------+
+                                            | Kubernetes API    |
+                                            |     Server        |
+                                            +---------+---------+
+                                                    |
+                                                    v
+                                            +---------+---------+
+                                            |  Mirrorverse      |
+                                            |   Controller      |
+                                            +---------+---------+
+                                                    |
+                                            Watches for labeled
+                                            Secrets/ConfigMaps
+                                                    |
+                                                    v
+                                            +---------+---------+
+                                            |  Reconcile Logic  |
+                                            |  - Parse labels   |
+                                            |  - Sync/cleanup   |
+                                            +---------+---------+
+                                                    |
+                                                    v
+                                            +---------+---------+
+                                            | Target Namespaces |
+                                            | (Replicas synced) |
+                                            +-------------------+
+    </code></pre>
+                </div>
+                <ul>
+                  <li><b>Watch:</b> Detects labeled source resources</li>
+                  <li><b>Reconcile:</b> Parses labels, determines targets and strategy</li>
+                  <li><b>Sync:</b> Creates/updates replicas in target namespaces</li>
+                  <li><b>Cleanup:</b> Removes or marks replicas as stale if the source is deleted</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="labels">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Key Labels</h2>
+                    <p>Control the entire sync process with a few simple labels on your source resources.</p>
+                </div>
+                
+                <div class="table-section">
+                    <h3 class="table-title">Source Resource Labels</h3>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Label</th>
+                                    <th>Purpose</th>
+                                    <th>Default</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>mirrorverse.dev/sync-source: "true"</code></td>
+                                    <td>Opt-in to syncing. Marks this resource as the source of truth.</td>
+                                    <td>Required</td>
+                                </tr>
+                                <tr>
+                                    <td><code>mirrorverse.dev/targets: "staging_prod"</code></td>
+                                    <td>Underscore-separated list of target namespaces to sync into.</td>
+                                    <td>Required</td>
+                                </tr>
+                                <tr>
+                                    <td><code>mirrorverse.dev/strategy: "replace"</code></td>
+                                    <td>Sync strategy: <code>replace</code> fully overwrites, <code>patch</code> merges.</td>
+                                    <td><code>patch</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>mirrorverse.dev/cleanup: "true"</code></td>
+                                    <td>If source is deleted, cleanup replicas automatically.</td>
+                                    <td><code>false</code> (optional)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>mirrorverse.dev/exclude: "devops"</code></td>
+                                    <td>Underscore-separated list of namespaces to <b>exclude</b> from targets.</td>
+                                    <td>Optional</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-section">
+                    <h3 class="table-title">Replica Resource Labels</h3>
+                    <p style="margin-bottom:1em; color:var(--medium-text);">These are automatically added by Mirrorverse to track and manage synced replicas.</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Label</th>
+                                    <th>Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>mirrorverse.dev/sync-replica: "true"</code></td>
+                                    <td>Indicates that this resource is a managed replica.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>mirrorverse.dev/sync-source-ref: "&lt;name&gt;.&lt;namespace&gt;"</code></td>
+                                    <td>References the name of the source resource it was synced from.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>mirrorverse.dev/stale: "true"</code></td>
+                                    <td>Set when the source no longer exists — marks the replica as orphaned.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="notes-block">
+                    <h3 class="table-title" style="font-size: 1.25rem; margin-bottom: 1rem;">Notes</h3>
+                    <ul>
+                        <li>The <code>mirrorverse.dev/cleanup: "true"</code> label enables <strong>auto-deletion</strong> of replicas. If omitted, replicas are just marked as <code>stale</code> and are no longer synced.</li>
+                        <li>The <code>mirrorverse.dev/exclude</code> label takes precedence. You can specify a broad target list and exclude specific namespaces from it.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="install" style="background-color: var(--card-bg);">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Get Started in Minutes</h2>
+                    <p>Install Mirrorverse in your cluster using the official Helm chart.</p>
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre><code id="helm-code"># 1. Add the Mirrorverse Helm repository
+helm repo add mirrorverse https://badal773.github.io/mirrorverse/
+
+# 2. Install the Mirrorverse chart
+helm install mirrorverse mirrorverse/mirrorverse  --create-namespace --namespace mirrorverse </code></pre>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Built for multi-tenant clusters. Inspired by Marvel. Written in Go.</p>
+            <p>Developed by <a href="https://github.com/badal773" target="_blank" rel="noopener noreferrer">@badal773</a>. View the source on <a href="https://github.com/badal773/mirrorverse" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+        </div>
+    </footer>
+
+    <script>
+        function copyCode(button) {
+            const codeBlock = document.getElementById('helm-code');
+            const text = codeBlock.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                button.innerText = 'Copied!';
+                setTimeout(() => {
+                    button.innerText = 'Copy';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>

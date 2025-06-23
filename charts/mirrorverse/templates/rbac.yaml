@@ -12,8 +12,6 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  annotations:
-    "helm.sh/resource-policy": keep
   name: mirrorverse
 rules:
 - apiGroups: [""]
@@ -24,8 +22,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: mirrorverse
-  annotations:
-    "helm.sh/resource-policy": keep
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -33,4 +29,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: mirrorverse
-    namespace: mirrorverse
+    namespace: {{ .Release.Namespace }}

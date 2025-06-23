@@ -34,22 +34,38 @@ Powered by label-driven syncing and conflict-resolution strategies, it ensures y
 ```
 
 ---
+##  Key Labels & Annotations (Used by Mirrorverse)
 
-## Key Labels 
+### **Source Resource Labels**
 
-| Resource | Key Label                                   | Purpose                        |
-|----------|---------------------------------------------|--------------------------------|
-| Source   | `mirrorverse.dev/sync-source: "true"`       | Opt-in to syncing              |
-| Source   | `mirrorverse.dev/targets: "staging_prod"`   | Where to sync                  |
-| Source   | `mirrorverse.dev/strategy: "replace(default)/patch"`| Syncing mode                   |
+These are applied to the **source Secret/ConfigMap** to enable and control syncing.
 
+| Label                                     | Purpose                                                         | Default            |
+| ----------------------------------------- | --------------------------------------------------------------- | ------------------ |
+| `mirrorverse.dev/sync-source: "true"`     | Opt-in to syncing. Marks this resource as the source of truth.  | Required           |
+| `mirrorverse.dev/targets: "staging_prod"` | Underscore-separated list of target namespaces to sync into.         | Required           |
+| `mirrorverse.dev/strategy: "replace"`     | Sync strategy: `replace` fully overwrites, `patch` merges.      | `patch`          |
+| `mirrorverse.dev/cleanup: "true"`         | If source is deleted, cleanup replicas automatically.           | `false` (optional) |
+| `mirrorverse.dev/exclude: "devops"`       | Underscore-separated list of namespaces to **exclude** from targets. | Optional           |
 
-| Resource | Key Label                                   | Purpose                        |
-|----------|---------------------------------------------|--------------------------------|
-| Replica  | `mirrorverse.dev/sync-replica: "true"`      | Marked as managed by you       |
-| Replica  | `mirrorverse.dev/sync-source-ref: "dev.db"` | Tracks origin                  |
-| Replica  | `mirrorverse.dev/stale: "true"`             | Marked as stale if source gone |
+---
 
+###  **Replica Resource Labels**
+
+These are automatically added by Mirrorverse to track and manage synced replicas.
+
+| Label                                       | Purpose                                                               |
+| ------------------------------------------- | --------------------------------------------------------------------- |
+| `mirrorverse.dev/sync-replica: "true"`      | Indicates that this resource is a managed replica.                    |
+| `mirrorverse.dev/sync-source-ref: "<name>.<namespace>"` | References the name of the source resource it was synced from.        |
+| `mirrorverse.dev/stale: "true"`             | Set when the source no longer exists — marks the replica as orphaned. |
+
+---
+
+### Notes
+
+* `mirrorverse.dev/cleanup: "true"` enables **auto-deletion** of replicas when their source is deleted. If omitted, replicas will just be marked as `stale`.
+* Sync targets (`mirrorverse.dev/targets`) and excludes (`mirrorverse.dev/exclude`) can both be specified, and exclude takes precedence.
 ---
 
 ## How It Works

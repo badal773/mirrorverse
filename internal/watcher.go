@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
@@ -59,7 +58,7 @@ func getWatcher(clientset *kubernetes.Clientset, resource string) (watch.Interfa
 
 // handleEvent processes a watch event for a resource.
 func handleEvent(event watch.Event, resource string, clientset *kubernetes.Clientset) {
-	name := getName(event.Object)
+	name := GetName(event.Object)
 	switch event.Type {
 	case watch.Added:
 		fmt.Printf("%s created: %s", resource, name)
@@ -72,6 +71,12 @@ func handleEvent(event watch.Event, resource string, clientset *kubernetes.Clien
 		if HasSyncSourceLabel(event.Object) {
 			fmt.Printf(" - found the source labels...\n")
 			CreateResource(clientset, event.Object)
+		}else if IsMirrorverseReplica(event.Object) && !IsMarkedAsStale(event.Object) {
+			fmt.Printf(" - found the mirrorverse replica...\n")
+			sourceName, sourcNamespace := GetSyncSourceRef(event.Object)
+			strategy := GetStrategy(event.Object)
+			UpdateResource(clientset, GetSyncSourceObject(clientset, sourceName, sourcNamespace), strategy, GetNamespace(event.Object), GetName(event.Object))
+			UpdateLabelsLastSynced(event.Object, clientset)
 		}
 	case watch.Deleted:
 		fmt.Printf("%s deleted: %s\n", resource, name)
@@ -81,14 +86,3 @@ func handleEvent(event watch.Event, resource string, clientset *kubernetes.Clien
 	}
 }
 
-// getName returns the name of a ConfigMap or Secret.
-func getName(obj interface{}) string {
-	switch o := obj.(type) {
-	case *corev1.ConfigMap:
-		return o.Name
-	case *corev1.Secret:
-		return o.Name
-	default:
-		return "unknown"
-	}
-}

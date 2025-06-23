@@ -10,7 +10,7 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-func UpdateResource(clientset *k8s.Clientset, obj interface{}, strategy string, namespace, name string) {
+func UpdateResource(clientset *k8s.Clientset, obj interface{}, strategy string, namespace string, name string) {
 	var err error
 	switch o := obj.(type) {
 	case *corev1.ConfigMap:

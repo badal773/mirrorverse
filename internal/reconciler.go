@@ -1,2 +1,0 @@
-// periodic reconciler
-package internal

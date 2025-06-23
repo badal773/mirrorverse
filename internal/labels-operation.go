@@ -2,12 +2,14 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 // Returns true if the object has the sync-source label set to "true"
@@ -19,17 +21,14 @@ func HasSyncSourceLabel(obj interface{}) bool {
 	return labels["mirrorverse.dev/sync-source"] == "true"
 }
 
-// Returns the labels of a ConfigMap or Secret, or nil otherwise
-func GetLabels(obj interface{}) map[string]string {
-	switch o := obj.(type) {
-	case *corev1.ConfigMap:
-		return o.Labels
-	case *corev1.Secret:
-		return o.Labels
-	default:
-		return nil
+func IsMirrorverseReplica(obj interface{}) bool {
+	labels := GetLabels(obj)
+	if labels == nil {
+		return false
 	}
+	return labels["mirrorverse.dev/sync-replica"] == "true"
 }
+
 
 // Helper to clean up metadata and set labels
 func UpdateResourceMeta(obj interface{}, labels map[string]string) {
@@ -80,15 +79,53 @@ func PrepareLabels(labels map[string]string, namespace, name string) (finalLabel
 	timeStr = strings.ReplaceAll(timeStr, "+", "Z")
 	managedLabels := map[string]string{
 		"mirrorverse.dev/sync-replica":    "true",
-		"mirrorverse.dev/sync-source-ref": fmt.Sprintf("%s.%s", namespace, name),
+		"mirrorverse.dev/sync-source-ref": fmt.Sprintf("%s.%s", name, namespace),
 		"mirrorverse.dev/last-synced":     timeStr,
 	}
+	// Add strategy label if it is empty
 	if strategy != "" {
-		managedLabels["mirrorverse.dev/strategy"] = strategy
+		managedLabels["mirrorverse.dev/strategy"] = "patch"
 	}
 	for k, v := range managedLabels {
 		cleanLabels[k] = v
 	}
 	
 	return cleanLabels, targets, exclude, strategy
+}
+
+
+// Helper to update the last-synced label
+func UpdateLabelsLastSynced(obj interface{}, clientset *kubernetes.Clientset) {
+	labels := GetLabels(obj)
+	if labels == nil {
+		return
+	}
+	timeStr := time.Now().Format("2006-01-02T15-04-05Z07.00")
+	timeStr = strings.ReplaceAll(timeStr, "+", "Z")
+
+	labels["mirrorverse.dev/last-synced"] = timeStr
+	UpdateLabels(obj, clientset, labels)
+}
+
+// update labels on the object
+func UpdateLabels(obj interface{}, clientset *kubernetes.Clientset, labels map[string]string) {
+	switch o := obj.(type) {
+	case *corev1.ConfigMap:
+		o.Labels = labels
+		_, err := clientset.CoreV1().ConfigMaps(GetNamespace(obj)).Update(context.TODO(), obj.(*corev1.ConfigMap), v1.UpdateOptions{})
+		if err != nil {
+			fmt.Printf("Failed to update last-synced label: %v\n", err)
+		} else {
+			fmt.Printf("Updated last-synced label for %s/%s\n", GetNamespace(obj), GetName(obj))
+		}
+	case *corev1.Secret:
+		o.Labels = labels
+		_, err := clientset.CoreV1().Secrets(GetNamespace(obj)).Update(context.TODO(), obj.(*corev1.Secret), v1.UpdateOptions{})
+		if err != nil {
+			fmt.Printf("Failed to update last-synced label: %v\n", err)
+		} else {
+			fmt.Printf("Updated last-synced label for %s/%s\n", GetNamespace(obj), GetName(obj))
+		}
+	}
+
 }

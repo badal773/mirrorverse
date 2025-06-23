@@ -102,6 +102,18 @@ These are automatically added by Mirrorverse to track and manage synced replicas
 
 ---
 
+## Installation (Helm)
+
+```sh
+# 1. Add the Mirrorverse Helm repository
+helm repo add mirrorverse https://badal773.github.io/mirrorverse/
+
+# 2. Install the Mirrorverse chart
+helm install mirrorverse mirrorverse/mirrorverse  --create-namespace --namespace mirrorverse
+```
+
+---
+
 ## Suggestions & Best Practices
 
 - Use clear and unique names for your source resources to avoid confusion in target namespaces.

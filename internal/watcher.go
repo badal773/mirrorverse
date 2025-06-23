@@ -85,7 +85,10 @@ func handleEvent(event watch.Event, resource string, clientset *kubernetes.Clien
 		}
 	case watch.Deleted:
 		fmt.Printf("%s deleted: %s\n", resource, name)
-		// Optionally handle deletion logic here
+		if HasSyncSourceLabel(event.Object) {
+			fmt.Printf(" - found the source labels...\n")
+			DeleteResource(clientset, event.Object)
+		}
 	case watch.Error:
 		fmt.Printf("Error event for %s: %v\n", resource, event.Object)
 	}

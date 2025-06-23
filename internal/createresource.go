@@ -11,6 +11,28 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
+// GetTargetNamespaces returns the final list of namespaces to apply, giving priority to excludeNamespaces
+func GetTargetNamespaces(targets, exclude string) []string {
+	targetNamespaces := []string{}
+	if targets != "" {
+		targetNamespaces = strings.Split(targets, "_")
+	}
+	excludeNamespaces := map[string]bool{}
+	if exclude != "" {
+		for _, ns := range strings.Split(exclude, "_") {
+			excludeNamespaces[strings.TrimSpace(ns)] = true
+		}
+	}
+	finalNamespaces := []string{}
+	for _, ns := range targetNamespaces {
+		ns = strings.TrimSpace(ns)
+		if ns == "" || excludeNamespaces[ns] {
+			continue // skip if excluded or empty
+		}
+		finalNamespaces = append(finalNamespaces, ns)
+	}
+	return finalNamespaces
+}
 
 func CreateResource(clientset *k8s.Clientset, obj interface{}) {
 	labels := GetLabels(obj)
@@ -31,24 +53,11 @@ func CreateResource(clientset *k8s.Clientset, obj interface{}) {
 	finalLabels, targets, exclude, strategy := PrepareLabels(labels, namespace, name)
 	UpdateResourceMeta(obj, finalLabels)
 
-	// Prepare target and exclude namespaces
-	targetNamespaces := []string{}
-	if targets != "" {
-		targetNamespaces = strings.Split(targets, "_")
-	}
-	excludeNamespaces := map[string]bool{}
-	if exclude != "" {
-		for _, ns := range strings.Split(exclude, "_") {
-			excludeNamespaces[strings.TrimSpace(ns)] = true
-		}
-	}
+	// Get final target namespaces (exclude takes priority)
+	finalNamespaces := GetTargetNamespaces(targets, exclude)
 
-	// Create in each target namespace except those in exclude
-	for _, targetNS := range targetNamespaces {
-		targetNS = strings.TrimSpace(targetNS)
-		if targetNS == "" || excludeNamespaces[targetNS] {
-			continue
-		}
+	// Create in each target namespace
+	for _, targetNS := range finalNamespaces {
 		// Set the target namespace for the object
 		var objtype string
 		switch o := obj.(type) {

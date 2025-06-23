@@ -114,17 +114,17 @@ func UpdateLabels(obj interface{}, clientset *kubernetes.Clientset, labels map[s
 		o.Labels = labels
 		_, err := clientset.CoreV1().ConfigMaps(GetNamespace(obj)).Update(context.TODO(), obj.(*corev1.ConfigMap), v1.UpdateOptions{})
 		if err != nil {
-			fmt.Printf("Failed to update last-synced label: %v\n", err)
+			fmt.Printf("Failed to update label: %v\n", err)
 		} else {
-			fmt.Printf("Updated last-synced label for %s/%s\n", GetNamespace(obj), GetName(obj))
+			fmt.Printf("Updated label for %s/%s\n", GetNamespace(obj), GetName(obj))
 		}
 	case *corev1.Secret:
 		o.Labels = labels
 		_, err := clientset.CoreV1().Secrets(GetNamespace(obj)).Update(context.TODO(), obj.(*corev1.Secret), v1.UpdateOptions{})
 		if err != nil {
-			fmt.Printf("Failed to update last-synced label: %v\n", err)
+			fmt.Printf("Failed to update label: %v\n", err)
 		} else {
-			fmt.Printf("Updated last-synced label for %s/%s\n", GetNamespace(obj), GetName(obj))
+			fmt.Printf("Updated label for %s/%s\n", GetNamespace(obj), GetName(obj))
 		}
 	}
 

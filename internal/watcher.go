@@ -71,7 +71,7 @@ func handleEvent(event watch.Event, resource string, clientset *kubernetes.Clien
 		if HasSyncSourceLabel(event.Object) {
 			fmt.Printf(" - found the source labels...\n")
 			CreateResource(clientset, event.Object)
-		} else if IsMirrorverseReplica(event.Object) && !IsMarkedAsStale(event.Object) {
+		} else if IsMirrorverseReplica(event.Object) && !IsMarkedAsStale(event.Object) && HasSyncSourceRef(event.Object) {
 			sourceName, sourceNamespace := GetSyncSourceRef(event.Object)
 			strategy := GetStrategy(event.Object)
 			sourceObj := GetSyncSourceObject(clientset, sourceName, sourceNamespace)

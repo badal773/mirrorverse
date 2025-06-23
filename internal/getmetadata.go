@@ -95,3 +95,12 @@ func IsMarkedAsStale(obj interface{}) bool {
 	}
 	return labels["mirrorverse.dev/stale"] == "true"
 }
+
+func HasSyncSourceRef(obj interface{}) bool {
+	labels := GetLabels(obj)
+	if labels == nil {
+		return false
+	}
+	_, ok := labels["mirrorverse.dev/sync-source-ref"]
+	return ok
+}

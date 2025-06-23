@@ -34,7 +34,7 @@ Powered by label-driven syncing and conflict-resolution strategies, it ensures y
 ```
 
 ---
-##  Key Labels & Annotations (Used by Mirrorverse)
+##  Key Labels (Used by Mirrorverse)
 
 ### **Source Resource Labels**
 

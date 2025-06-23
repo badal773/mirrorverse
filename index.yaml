@@ -1,0 +1,18 @@
+apiVersion: v1
+entries:
+  mirrorverse:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-06-23T20:31:23.664711745Z"
+    description: A Kubernetes controller that syncs Secrets and ConfigMaps across
+      namespaces
+    digest: 90ca1c9f4214549da1e560ac929ad3752f1a3f2dd500e1e9f0daa9202dff2fcb
+    maintainers:
+    - email: badal@devtron.ai
+      name: Badal Kumar
+    name: mirrorverse
+    type: application
+    urls:
+    - https://github.com/badal773/mirrorverse/releases/download/mirrorverse-0.1.0/mirrorverse-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-06-23T20:31:23.664716604Z"

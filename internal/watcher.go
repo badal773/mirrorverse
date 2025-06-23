@@ -71,12 +71,17 @@ func handleEvent(event watch.Event, resource string, clientset *kubernetes.Clien
 		if HasSyncSourceLabel(event.Object) {
 			fmt.Printf(" - found the source labels...\n")
 			CreateResource(clientset, event.Object)
-		}else if IsMirrorverseReplica(event.Object) && !IsMarkedAsStale(event.Object) {
-			fmt.Printf(" - found the mirrorverse replica...\n")
-			sourceName, sourcNamespace := GetSyncSourceRef(event.Object)
+		} else if IsMirrorverseReplica(event.Object) && !IsMarkedAsStale(event.Object) {
+			sourceName, sourceNamespace := GetSyncSourceRef(event.Object)
 			strategy := GetStrategy(event.Object)
-			UpdateResource(clientset, GetSyncSourceObject(clientset, sourceName, sourcNamespace), strategy, GetNamespace(event.Object), GetName(event.Object))
-			UpdateLabelsLastSynced(event.Object, clientset)
+			sourceObj := GetSyncSourceObject(clientset, sourceName, sourceNamespace)
+			if NeedsSync(event.Object, sourceObj) { // <-- Only update if needed
+				fmt.Printf(" - found the mirrorverse replica and needs sync...\n")
+				UpdateResource(clientset, sourceObj, strategy, GetNamespace(event.Object), GetName(event.Object))
+				UpdateLabelsLastSynced(event.Object, clientset)
+			} else {
+				fmt.Printf(" - found the mirrorverse replica but no sync needed. as no changes detected\n")
+			}
 		}
 	case watch.Deleted:
 		fmt.Printf("%s deleted: %s\n", resource, name)
